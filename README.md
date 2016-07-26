@@ -1,3 +1,10 @@
+> **Note**: If you are switching to `OwnLocal/goes` from `belogik/goes` you will want to point whatever
+> dependency management system you are using at the `v1.0.0` tag to maintain backward compatibility
+> (or change your code to support any API changes which may exist). The `master` branch will contain
+> whatever the latest released version is and the `develop` branch will contain the currently
+> in-progress version. Either of these branches may contain backwards-incompatible changes from the
+> `v1.0.0` tag (which contains the code as it was when the code was forked from `belogik/goes`).
+
 Goes : a library to interact with ElasticSearch
 ===============================================
 

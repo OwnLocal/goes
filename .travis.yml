@@ -29,7 +29,8 @@ before_script:
   - ${HOME}/elasticsearch/elasticsearch-${ES_VERSION}/bin/elasticsearch >/dev/null &
 
 install:
-  - go get gopkg.in/check.v1
+  - go install github.com/Masterminds/glide
+  - glide install
 
 script:
   - make test

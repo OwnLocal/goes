@@ -1,0 +1,6 @@
+hash: 7e39b5bd354c3f0770ca3a9d28a74a0523695d18effa1e540f006b325defcfe7
+updated: 2016-07-26T14:50:32.597335795-05:00
+imports: []
+testImports:
+- name: github.com/go-check/check
+  version: 4f90aeace3a26ad7021961c297b22c42160c7b25
