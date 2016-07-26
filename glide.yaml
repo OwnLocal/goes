@@ -1,0 +1,5 @@
+package: github.com/OwnLocal/goes
+import: []
+testImport:
+- package: github.com/go-check/check
+  version: v1
