@@ -67,8 +67,8 @@ func (s *GoesTestSuite) TestUrl(c *C) {
 		Query:     "q",
 		IndexList: []string{"i"},
 		TypeList:  []string{},
-		method:    "GET",
-		api:       "_search",
+		Method:    "GET",
+		API:       "_search",
 	}
 
 	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/i/_search")
@@ -83,8 +83,8 @@ func (s *GoesTestSuite) TestUrl(c *C) {
 	r.ExtraArgs.Set("version", "1")
 	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/c,d/_search?version=1")
 
-	r.id = "1234"
-	r.api = ""
+	r.ID = "1234"
+	r.API = ""
 	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/c,d/1234/?version=1")
 }
 
@@ -97,8 +97,8 @@ func (s *GoesTestSuite) TestEsDown(c *C) {
 		Conn:      conn,
 		Query:     query,
 		IndexList: []string{"i"},
-		method:    "GET",
-		api:       "_search",
+		Method:    "GET",
+		API:       "_search",
 	}
 	_, err := r.Run()
 
@@ -114,8 +114,8 @@ func (s *GoesTestSuite) TestRunMissingIndex(c *C) {
 		Conn:      conn,
 		Query:     query,
 		IndexList: []string{"i"},
-		method:    "GET",
-		api:       "_search",
+		Method:    "GET",
+		API:       "_search",
 	}
 	_, err := r.Run()
 

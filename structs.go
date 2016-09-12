@@ -37,13 +37,13 @@ type Request struct {
 	TypeList []string
 
 	// HTTP Method to user (GET, POST ...)
-	method string
+	Method string
 
 	// Which api keyword (_search, _bulk, etc) to use
-	api string
+	API string
 
 	// Bulk data
-	bulkData []byte
+	BulkData []byte
 
 	// Request body
 	Body []byte
@@ -52,7 +52,7 @@ type Request struct {
 	ExtraArgs url.Values
 
 	// Used for the id field when indexing a document
-	id string
+	ID string
 }
 
 // Represents a Response from elasticsearch
