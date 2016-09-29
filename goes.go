@@ -353,8 +353,9 @@ func (req *Request) Run() (*Response, error) {
 	}
 
 	if req.method != "HEAD" {
-		err = json.Unmarshal(body, &esResp)
-		if err != nil {
+		dec := json.NewDecoder(bytes.NewReader(body))
+		dec.UseNumber()
+		if err := dec.Decode(&esResp); err != nil {
 			return esResp, err
 		}
 		err = json.Unmarshal(body, &esResp.Raw)
