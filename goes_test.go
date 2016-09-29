@@ -846,6 +846,9 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 	c.Assert(sizeInBytes > 0, Equals, true)
 	c.Assert(refreshTotal > 0, Equals, true)
 
+	var mockNullValue json.Number
+	mockNullValue = "0"
+
 	expectedIndices := map[string]IndexStatus{
 		indexName: {
 			Index: map[string]interface{}{
@@ -861,21 +864,21 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 				"deleted_docs": 0,
 			},
 			Merges: map[string]interface{}{
-				"current":               float64(0),
-				"current_docs":          float64(0),
-				"current_size_in_bytes": float64(0),
-				"total":                 float64(0),
-				"total_time_in_millis":  float64(0),
-				"total_docs":            float64(0),
-				"total_size_in_bytes":   float64(0),
+				"current":               mockNullValue,
+				"current_docs":          mockNullValue,
+				"current_size_in_bytes": mockNullValue,
+				"total":                 mockNullValue,
+				"total_time_in_millis":  mockNullValue,
+				"total_docs":            mockNullValue,
+				"total_size_in_bytes":   mockNullValue,
 			},
 			Refresh: map[string]interface{}{
 				"total":                jsonRefreshTotal,
-				"total_time_in_millis": float64(0),
+				"total_time_in_millis": mockNullValue,
 			},
 			Flush: map[string]interface{}{
-				"total":                float64(0),
-				"total_time_in_millis": float64(0),
+				"total":                mockNullValue,
+				"total_time_in_millis": mockNullValue,
 			},
 		},
 	}
