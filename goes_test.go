@@ -1232,7 +1232,9 @@ func (s *GoesTestSuite) TestUpdate(c *C) {
 
 	response, err = conn.Get(indexName, docType, docId, url.Values{})
 	c.Assert(err, Equals, nil)
-	c.Assert(response.Source["counter"], Equals, float64(6))
+	jsonCounter, _ := response.Source["counter"].(json.Number)
+	counter, _ := jsonCounter.Float64()
+	c.Assert(counter, Equals, float64(6))
 	c.Assert(response.Source["user"], Equals, "foo")
 	c.Assert(response.Source["message"], Equals, "bar")
 
