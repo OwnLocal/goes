@@ -835,7 +835,8 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 	expectedShards := Shard{Total: 2, Successful: 1, Failed: 0}
 	c.Assert(response.Shards, Equals, expectedShards)
 
-	primarySizeInBytes := response.Indices[indexName].Index["primary_size_in_bytes"].(float64)
+	jsonPrimarySizeInBytes, _ := response.Indices[indexName].Index["primary_size_in_bytes"].(json.Number)
+	primarySizeInBytes, _ := jsonPrimarySizeInBytes.Float64()
 	sizeInBytes := response.Indices[indexName].Index["size_in_bytes"].(float64)
 	refreshTotal := response.Indices[indexName].Refresh["total"].(float64)
 
