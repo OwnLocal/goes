@@ -849,8 +849,8 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 	expectedIndices := map[string]IndexStatus{
 		indexName: {
 			Index: map[string]interface{}{
-				"primary_size_in_bytes": primarySizeInBytes,
-				"size_in_bytes":         sizeInBytes,
+				"primary_size_in_bytes": jsonPrimarySizeInBytes,
+				"size_in_bytes":         jsonSizeInBytes,
 			},
 			Translog: map[string]uint64{
 				"operations": 0,
@@ -870,7 +870,7 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 				"total_size_in_bytes":   float64(0),
 			},
 			Refresh: map[string]interface{}{
-				"total":                refreshTotal,
+				"total":                jsonRefreshTotal,
 				"total_time_in_millis": float64(0),
 			},
 			Flush: map[string]interface{}{
