@@ -1,4 +1,4 @@
-package: github.com/arhitiron/goes
+package: github.com/OwnLocal/goes
 import: []
 testImport:
 - package: github.com/go-check/check
