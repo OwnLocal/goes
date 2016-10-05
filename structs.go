@@ -20,6 +20,9 @@ type Connection struct {
 	// Client is the http client used to make requests, allowing settings things
 	// such as timeouts etc
 	Client *http.Client
+
+	// Specify to use numbers when unmarshal
+	UseNumber bool
 }
 
 // Represents a Request to elasticsearch

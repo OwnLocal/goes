@@ -32,7 +32,7 @@ func (err *SearchError) Error() string {
 // This function is pretty useless for now but might be useful in a near future
 // if wee need more features like connection pooling or load balancing.
 func NewConnection(host string, port string) *Connection {
-	return &Connection{host, port, http.DefaultClient}
+	return &Connection{host, port, http.DefaultClient, false}
 }
 
 func (c *Connection) WithClient(cl *http.Client) *Connection {
@@ -342,6 +342,27 @@ func (c *Connection) Delete(d Document, extraArgs url.Values) (*Response, error)
 	return r.Run()
 }
 
+// Enable use number behaviour
+func (c *Connection) UseNumberEnable() {
+	c.UseNumber = true
+}
+
+func (req *Request) unmarshalBody(body []byte, esResp *Response) error {
+	if !req.Conn.UseNumber {
+		err := json.Unmarshal(body, esResp)
+		if err != nil {
+			return err
+		}
+	} else {
+		dec := json.NewDecoder(bytes.NewReader(body))
+		dec.UseNumber()
+		if err := dec.Decode(esResp); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Run executes an elasticsearch Request. It converts data to Json, sends the
 // request and returns the Response obtained
 func (req *Request) Run() (*Response, error) {
@@ -353,7 +374,7 @@ func (req *Request) Run() (*Response, error) {
 	}
 
 	if req.method != "HEAD" {
-		err = json.Unmarshal(body, &esResp)
+		err = req.unmarshalBody(body, esResp)
 		if err != nil {
 			return esResp, err
 		}

@@ -41,7 +41,7 @@ func (s *GoesTestSuite) SetUpTest(c *C) {
 
 func (s *GoesTestSuite) TestNewConnection(c *C) {
 	conn := NewConnection(ES_HOST, ES_PORT)
-	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, http.DefaultClient})
+	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, http.DefaultClient, false})
 }
 
 func (s *GoesTestSuite) TestWithClient(c *C) {
@@ -54,7 +54,7 @@ func (s *GoesTestSuite) TestWithClient(c *C) {
 	}
 	conn := NewConnection(ES_HOST, ES_PORT).WithClient(cl)
 
-	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, cl})
+	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, cl, false})
 	c.Assert(conn.Client.Transport.(*http.Transport).DisableCompression, Equals, true)
 	c.Assert(conn.Client.Transport.(*http.Transport).ResponseHeaderTimeout, Equals, 1*time.Second)
 }
