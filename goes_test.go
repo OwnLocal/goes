@@ -13,7 +13,6 @@ import (
 	"time"
 
 	. "github.com/go-check/check"
-	"encoding/json"
 )
 
 var (
@@ -22,9 +21,7 @@ var (
 )
 
 // Hook up gocheck into the gotest runner.
-func Test(t *testing.T) {
-	TestingT(t)
-}
+func Test(t *testing.T) { TestingT(t) }
 
 type GoesTestSuite struct{}
 
@@ -44,7 +41,7 @@ func (s *GoesTestSuite) SetUpTest(c *C) {
 
 func (s *GoesTestSuite) TestNewConnection(c *C) {
 	conn := NewConnection(ES_HOST, ES_PORT)
-	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, http.DefaultClient})
+	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, http.DefaultClient, false})
 }
 
 func (s *GoesTestSuite) TestWithClient(c *C) {
@@ -57,9 +54,9 @@ func (s *GoesTestSuite) TestWithClient(c *C) {
 	}
 	conn := NewConnection(ES_HOST, ES_PORT).WithClient(cl)
 
-	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, cl})
+	c.Assert(conn, DeepEquals, &Connection{ES_HOST, ES_PORT, cl, false})
 	c.Assert(conn.Client.Transport.(*http.Transport).DisableCompression, Equals, true)
-	c.Assert(conn.Client.Transport.(*http.Transport).ResponseHeaderTimeout, Equals, 1 * time.Second)
+	c.Assert(conn.Client.Transport.(*http.Transport).ResponseHeaderTimeout, Equals, 1*time.Second)
 }
 
 func (s *GoesTestSuite) TestUrl(c *C) {
@@ -74,21 +71,21 @@ func (s *GoesTestSuite) TestUrl(c *C) {
 		api:       "_search",
 	}
 
-	c.Assert(r.Url(), Equals, "http://" + ES_HOST + ":" + ES_PORT + "/i/_search")
+	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/i/_search")
 
 	r.IndexList = []string{"a", "b"}
-	c.Assert(r.Url(), Equals, "http://" + ES_HOST + ":" + ES_PORT + "/a,b/_search")
+	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/_search")
 
 	r.TypeList = []string{"c", "d"}
-	c.Assert(r.Url(), Equals, "http://" + ES_HOST + ":" + ES_PORT + "/a,b/c,d/_search")
+	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/c,d/_search")
 
 	r.ExtraArgs = make(url.Values, 1)
 	r.ExtraArgs.Set("version", "1")
-	c.Assert(r.Url(), Equals, "http://" + ES_HOST + ":" + ES_PORT + "/a,b/c,d/_search?version=1")
+	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/c,d/_search?version=1")
 
 	r.id = "1234"
 	r.api = ""
-	c.Assert(r.Url(), Equals, "http://" + ES_HOST + ":" + ES_PORT + "/a,b/c,d/1234/?version=1")
+	c.Assert(r.Url(), Equals, "http://"+ES_HOST+":"+ES_PORT+"/a,b/c,d/1234/?version=1")
 }
 
 func (s *GoesTestSuite) TestEsDown(c *C) {
@@ -738,13 +735,6 @@ func (s *GoesTestSuite) TestSearch(c *C) {
 	}
 	response, err := conn.Search(query, []string{indexName}, []string{docType}, url.Values{})
 
-
-	//Type of response.Hits.MaxScore is json.Number, and DeepEquals will return false,
-	// so we need to change it manualy
-	jsonNumberMaxScore, _ := response.Hits.MaxScore.(json.Number)
-	maxScore, _ := jsonNumberMaxScore.Float64()
-	response.Hits.MaxScore = maxScore
-
 	expectedHits := Hits{
 		Total:    1,
 		MaxScore: 1.0,
@@ -835,25 +825,19 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 	expectedShards := Shard{Total: 2, Successful: 1, Failed: 0}
 	c.Assert(response.Shards, Equals, expectedShards)
 
-	jsonPrimarySizeInBytes, _ := response.Indices[indexName].Index["primary_size_in_bytes"].(json.Number)
-	primarySizeInBytes, _ := jsonPrimarySizeInBytes.Float64()
-	jsonSizeInBytes, _ := response.Indices[indexName].Index["size_in_bytes"].(json.Number)
-	sizeInBytes, _ := jsonSizeInBytes.Float64()
-	jsonRefreshTotal, _ := response.Indices[indexName].Refresh["total"].(json.Number)
-	refreshTotal, _ := jsonRefreshTotal.Float64()
+	primarySizeInBytes := response.Indices[indexName].Index["primary_size_in_bytes"].(float64)
+	sizeInBytes := response.Indices[indexName].Index["size_in_bytes"].(float64)
+	refreshTotal := response.Indices[indexName].Refresh["total"].(float64)
 
 	c.Assert(primarySizeInBytes > 0, Equals, true)
 	c.Assert(sizeInBytes > 0, Equals, true)
 	c.Assert(refreshTotal > 0, Equals, true)
 
-	var mockNullValue json.Number
-	mockNullValue = "0"
-
 	expectedIndices := map[string]IndexStatus{
 		indexName: {
 			Index: map[string]interface{}{
-				"primary_size_in_bytes": jsonPrimarySizeInBytes,
-				"size_in_bytes":         jsonSizeInBytes,
+				"primary_size_in_bytes": primarySizeInBytes,
+				"size_in_bytes":         sizeInBytes,
 			},
 			Translog: map[string]uint64{
 				"operations": 0,
@@ -864,21 +848,21 @@ func (s *GoesTestSuite) TestIndexStatus(c *C) {
 				"deleted_docs": 0,
 			},
 			Merges: map[string]interface{}{
-				"current":               mockNullValue,
-				"current_docs":          mockNullValue,
-				"current_size_in_bytes": mockNullValue,
-				"total":                 mockNullValue,
-				"total_time_in_millis":  mockNullValue,
-				"total_docs":            mockNullValue,
-				"total_size_in_bytes":   mockNullValue,
+				"current":               float64(0),
+				"current_docs":          float64(0),
+				"current_size_in_bytes": float64(0),
+				"total":                 float64(0),
+				"total_time_in_millis":  float64(0),
+				"total_docs":            float64(0),
+				"total_size_in_bytes":   float64(0),
 			},
 			Refresh: map[string]interface{}{
-				"total":                jsonRefreshTotal,
-				"total_time_in_millis": mockNullValue,
+				"total":                refreshTotal,
+				"total_time_in_millis": float64(0),
 			},
 			Flush: map[string]interface{}{
-				"total":                mockNullValue,
-				"total_time_in_millis": mockNullValue,
+				"total":                float64(0),
+				"total_time_in_millis": float64(0),
 			},
 		},
 	}
@@ -1082,30 +1066,18 @@ func (s *GoesTestSuite) TestAggregations(c *C) {
 	c.Assert(user.Buckets()[1].Key(), Equals, "foo")
 
 	barAge := user.Buckets()[0].Aggregation("age")
-	jCount, _ := barAge["count"].(json.Number)
-	countInt64, _ := jCount.Int64()
-	c.Assert(countInt64, Equals, int64(1))
-	jSum, _ := barAge["sum"].(json.Number)
-	sumFloat64, _ := jSum.Float64()
-	c.Assert(sumFloat64, Equals, 30.0)
+	c.Assert(barAge["count"], Equals, 1.0)
+	c.Assert(barAge["sum"], Equals, 30.0)
 
 	fooAge := user.Buckets()[1].Aggregation("age")
-	jCount, _ = fooAge["count"].(json.Number)
-	countInt64, _ = jCount.Int64()
-	c.Assert(countInt64, Equals, int64(1))
-	jSum, _ = fooAge["sum"].(json.Number)
-	sumFloat64, _ = jSum.Float64()
-	c.Assert(sumFloat64, Equals, 25.0)
+	c.Assert(fooAge["count"], Equals, 1.0)
+	c.Assert(fooAge["sum"], Equals, 25.0)
 
 	age, ok := resp.Aggregations["age"]
 	c.Assert(ok, Equals, true)
 
-	jCount, _ = age["count"].(json.Number)
-	countInt64, _ = jCount.Int64()
-	c.Assert(countInt64, Equals, int64(2))
-	jSum, _ = age["sum"].(json.Number)
-	sumFloat64, _ = jSum.Float64()
-	c.Assert(sumFloat64, Equals, 25.0 + 30.0)
+	c.Assert(age["count"], Equals, 2.0)
+	c.Assert(age["sum"], Equals, 25.0+30.0)
 }
 
 func (s *GoesTestSuite) TestPutMapping(c *C) {
@@ -1238,9 +1210,7 @@ func (s *GoesTestSuite) TestUpdate(c *C) {
 
 	response, err = conn.Get(indexName, docType, docId, url.Values{})
 	c.Assert(err, Equals, nil)
-	jsonCounter, _ := response.Source["counter"].(json.Number)
-	counter, _ := jsonCounter.Float64()
-	c.Assert(counter, Equals, float64(6))
+	c.Assert(response.Source["counter"], Equals, float64(6))
 	c.Assert(response.Source["user"], Equals, "foo")
 	c.Assert(response.Source["message"], Equals, "bar")
 
@@ -1427,7 +1397,7 @@ func (s *GoesTestSuite) TestRemoveAlias(c *C) {
 
 	// Get document via alias
 	_, err = conn.Get(aliasName, docType, docId, url.Values{})
-	c.Assert(err.Error(), Equals, "[404] IndexMissingException[[" + aliasName + "] missing]")
+	c.Assert(err.Error(), Equals, "[404] IndexMissingException[["+aliasName+"] missing]")
 }
 
 func (s *GoesTestSuite) TestAliasExists(c *C) {
